@@ -1,0 +1,6 @@
+{
+  "snapshot_date": "2026-10-18",
+  "version": 24,
+  "source_commit": "b531cb96b378c7b48ba875dd78d08ad0602ecbdb",
+  "update_policy": "Update GitHub only when the owner explicitly requests it."
+}
