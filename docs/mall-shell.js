@@ -2,8 +2,8 @@ import * as THREE from './vendor/three.module.js';
 import {makeWallLettering} from './wall-lettering.js';
 import font from './assets/mall-font.js';
 import {mallLayout,hallWallRects,mallFloorRects} from './mall-navigation.js?v=24';
-import {createAshanSalon} from './ashan-salon.js?v=26';
-import {createOmskSalon} from './omsk-salon.js?v=26';
+import {createAshanSalon} from './ashan-salon.js?v=28';
+import {createOmskSalon} from './omsk-salon.js?v=28';
 import {ashanSize} from './ashan-layout.js?v=24';
 
 function box(parent,w,h,d,x,y,z,m,name=''){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.name=name;o.castShadow=o.receiveShadow=true;parent.add(o);return o;}

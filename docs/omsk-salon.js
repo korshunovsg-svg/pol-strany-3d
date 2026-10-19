@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import {omskSize,omskFootprint,omskWalls,omskDisplays,omskWorkstation,omskContains} from './omsk-layout.js?v=24';
-import {createDisplayFurnishing,batchFurniture} from './ashan-salon.js?v=26';
+import {createDisplayFurnishing,batchFurniture} from './ashan-salon.js?v=28';
+import {createParquetHeadings,createCorkartBrandPanel,createQuickStepWallLogo,createWallCategorySign} from './showroom-branding.js?v=28';
 import {makeWallLettering} from './wall-lettering.js';
 import font from './assets/omsk/font.js?v=21';
 import {createOmskCrownwoodPanel,placePanelAboveDisplays} from './crownwood-panels.js?v=26';
@@ -43,8 +44,8 @@ export function createOmskSalon({sourceModel,woodTextures=[],parquetTextures={},
   const g=new THREE.Group();g.userData={roomId:'omsk',omskWall:true,column:r.column,planId:r.planId,side:'custom'};g.name=r.column?'Full-height column from the PDF':'Omsk wall from the PDF';root.add(g);walls.push(g);
   const w=r.maxX-r.minX,d=r.maxZ-r.minZ,x=(r.minX+r.maxX)/2,z=(r.minZ+r.maxZ)/2;
   if(!r.column){let n=null;if(r.minX<.09&&w<.15)n=[-1,0];else if(r.maxZ>W-.09&&d<.45)n=[0,1];else if(Math.abs(z-b)<.15)n=[0,-1];else if(Math.abs(x-a)<.15&&z<b)n=[-1,0];if(n)g.userData.outward={x,z,n};}
-  box(g,w,2.55,d,x,1.275,z,gray,r.column?'Dark lower column cladding':'Dark lower showroom wall');box(g,w,H-2.55,d,x,(H+2.55)/2,z,ivory,r.column?'White upper column to the ceiling':'White high showroom wall');
-  if(r.column)box(g,w+.008,.045,d+.008,x,.027,z,ivory,'Column skirting');
+  box(g,w,2.55,d,x,1.275,z,gray,r.column?'Dark lower column cladding':'Dark lower showroom wall');box(g,w,H-2.55,d,x,(H+2.55)/2,z,gray,r.column?'Gray upper column to the ceiling':'Gray high showroom wall');
+  if(r.column)box(g,w+.008,.045,d+.008,x,.027,z,gray,'Column skirting');
  }
  // Low service-zone backdrop and a simple timber PS panel, as in the photographs.
  box(root,.025,2.6,2.6,a+.10,1.3,6.73,new THREE.MeshStandardMaterial({map:woodTextures[3]??null,color:0xd1c2a4,roughness:.87}),'Timber PS workstation backdrop');
@@ -69,5 +70,13 @@ export function createOmskSalon({sourceModel,woodTextures=[],parquetTextures={},
  for(const [text,x,w] of [['ПАРКЕТ',12.1,2.5],['ПОЛ СТРАНЫ',16.1,2.9]]){const g=letters(portal,text,.38,x+w,signY+.14,-.112,Math.PI,text==='ПОЛ СТРАНЫ'?0x48c82e:0xf8f8ef,w);g.userData.omskFacadeSign=true;}
  const furnishing=createDisplayFurnishing({sourceModel,layout:[...omskDisplays,...omskWorkstation],woodTextures,parquetTextures,extraTextures,roomId:'omsk',createCustom:lounge});root.add(furnishing);
  const panel=createOmskCrownwoodPanel(woodTextures[0]);panel.position.set(a+.101,0,2.52);panel.rotation.y=Math.PI/2;placePanelAboveDisplays(panel,furnishing,['urban','nord']);walls.find(w=>w.userData.planId===253).add(panel);
+ const headings=createParquetHeadings(2.7);headings.position.set(panel.position.x,new THREE.Box3().setFromObject(panel).max.y+.18,panel.position.z);headings.rotation.y=Math.PI/2;walls.find(w=>w.userData.planId===253).add(headings);
+ // Corkart's bank faces inward from the short PDF wall at the open frontage.
+ const corkWall=omskWalls.find(w=>w.planId===267),corkart=createCorkartBrandPanel(extraTextures.corkartPanelReference);corkart.position.set(corkWall.minX-.014,0,(corkWall.minZ+corkWall.maxZ)/2);corkart.rotation.y=-Math.PI/2;placePanelAboveDisplays(corkart,furnishing,['corkart','corkartPVC'],.14);walls.find(w=>w.userData.planId===267).add(corkart);
+ // Wall signs follow the real laminate/PVC banks. The logo sits over the
+ // first PVC cabinets, close to the laminate boundary, on the same inward face.
+ for(const [text,width,x,y,planId] of [['ЛАМИНАТ',2.8,6.8,3.12,274],['Quick-Step',1.95,11.9,2.94,272],['ПВХ-ПЛИТКА',2.05,14.65,3.12,272]]){
+  const sign=text==='Quick-Step'?createQuickStepWallLogo(width):createWallCategorySign(text,width);delete sign.userData.ashanCategory;sign.userData.omskCategory=text;sign.position.set(x,y,16.76203);sign.rotation.y=Math.PI;walls.find(w=>w.userData.planId===planId).add(sign);
+ }
  root.userData.ceilingPanels=panels;return {root,walls,roof,lights,portal,furnishing};
 }

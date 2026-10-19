@@ -5,7 +5,7 @@ import {createSampleRacks,rackObstacles,drawSampleRacksMap} from './sample-racks
 import {createDWRacks,dwObstacles,drawDWRacksMap} from './dw-racks.js?v=10';
 import {createPolarwoodRacks,polarwoodObstacles,drawPolarwoodMap} from './polarwood-racks.js?v=9';
 import {createHarmonyRacks,harmonyObstacles,drawHarmonyMap} from './harmony-racks.js?v=10';
-import {createMall,addSalonEntranceSign} from './mall-shell.js?v=26';
+import {createMall,addSalonEntranceSign} from './mall-shell.js?v=28';
 import {mallLayout,mallFloorRects,roomFootprint,getRoomFootprint,roomToWorld,mallLocation,containsMallFloor,createMallNavigation,mallMapMetrics,worldToMallMap,mallMapToWorld,transformRoomRect} from './mall-navigation.js?v=24';
 import {omskSize,omskColumns,omskWalls,omskFurnitureObstacles,drawOmskMap} from './omsk-layout.js?v=24';
 import {ashanFurnitureObstacles,drawAshanMap} from './ashan-layout.js?v=24';
@@ -14,7 +14,7 @@ import {createLaminateRacks,laminateObstacles,drawLaminateMap} from './laminate-
 import {createIslandRacks,islandObstacles,drawIslandMap} from './island-racks.js?v=17';
 import {createSPCRacks,spcObstacles,drawSPCMap} from './spc-racks.js?v=23';
 import {createCrocusUnderlay,underlayObstacles,drawUnderlayMap} from './underlay-rack.js?v=25';
-import {batchFurniture} from './ashan-salon.js?v=26';
+import {batchFurniture} from './ashan-salon.js?v=28';
 import {createScenePerformance} from './scene-performance.js?v=25';
 const $=id=>document.getElementById(id);
 const BASE={length:15,width:5.5,height:3.1,notch:1.05,notchEnd:4.05};
@@ -129,6 +129,7 @@ for(const t of [...Object.values(parquetTextures.photoTextures),...Object.values
 const extraTextures={photoTextures:{},brandTextures:{},labelTexture:loader.load('assets/ashan-extra/product-label.svg')};
 extraTextures.underlayReference=loader.load('assets/update25/underlay-reference.png');extraTextures.underlayReference.colorSpace=THREE.SRGBColorSpace;extraTextures.underlayReference.anisotropy=4;
 extraTextures.ashanPanelReference=loader.load('assets/update25/ashan-panels-reference.png');extraTextures.ashanPanelReference.colorSpace=THREE.SRGBColorSpace;extraTextures.ashanPanelReference.anisotropy=4;
+extraTextures.corkartPanelReference=loader.load('assets/update28/corkart-reference.jpg');extraTextures.corkartPanelReference.colorSpace=THREE.SRGBColorSpace;extraTextures.corkartPanelReference.anisotropy=4;
 model.add(createCrocusUnderlay(extraTextures.underlayReference));
 extraTextures.remainingPhotos={};extraTextures.remainingLabels={};
 for(const kind of ['alpinePVC','evofloor','skalla','norland','karelia','carpet'])extraTextures.remainingPhotos[kind]=loader.load(`assets/remaining/${kind}-reference.jpg`);

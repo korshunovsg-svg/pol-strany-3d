@@ -3,8 +3,9 @@ import {ashanSize,ashanDisplays,ashanWorkstation} from './ashan-layout.js?v=24';
 import {createExtraRack,extraRackNames} from './ashan-extra-racks.js?v=23';
 import {createParquetStand,parquetNames} from './ashan-parquet.js?v=21';
 import {createRemainingRack,remainingNames} from './remaining-racks.js?v=24';
-import {createAshanCrownwoodPanels,placePanelAboveDisplays,createAshanCategorySign} from './crownwood-panels.js?v=26';
+import {createAshanCrownwoodPanels,placePanelAboveDisplays} from './crownwood-panels.js?v=26';
 import {createPolStranyWallPanel,wallLayout} from './wall-decor.js?v=26';
+import {createQuickStepWallLogo,createParquetHeadings,createWallCategorySign} from './showroom-branding.js?v=28';
 import {createUnderlayRack} from './underlay-rack.js?v=25';
 
 function mesh(parent,g,m,x=0,y=0,z=0,name=''){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.name=name;o.castShadow=o.receiveShadow=true;parent.add(o);return o;}
@@ -82,13 +83,14 @@ export function createAshanSalon({sourceModel,woodTextures=[],parquetTextures={}
  const furnishing=createDisplayFurnishing({sourceModel,layout:[...ashanDisplays,...ashanWorkstation],woodTextures,parquetTextures,extraTextures});root.add(furnishing);
  const panel=createAshanCrownwoodPanels(woodTextures[0],extraTextures.ashanPanelReference);panel.position.set(13.985,0,W-.015);panel.rotation.y=Math.PI;placePanelAboveDisplays(panel,furnishing,['urban','nord']);root.add(panel);
  const crownWall=walls.find(w=>w.userData.side==='south');crownWall.userData.blankWall=false;crownWall.userData.crownwoodWall=true;crownWall.name='Dark showroom wall with three Crownwood decorative elements';root.updateMatrixWorld(true);crownWall.attach(panel);
+ const headings=createParquetHeadings(3.6);headings.position.set(panel.getWorldPosition(new THREE.Vector3()).x,new THREE.Box3().setFromObject(panel).max.y+.18,W-.015);headings.rotation.y=Math.PI;root.add(headings);root.updateMatrixWorld(true);crownWall.attach(headings);
  // Same timber backdrop and logo as Crocus, centred behind the consultation desk.
  // Its 3.1 m height is independent of Ashan's 5.1 m industrial ceiling.
  const desk=ashanWorkstation.find(o=>o.kind==='desk'),backdrop=createPolStranyWallPanel({oak:woodTextures[0]});backdrop.position.set(desk.x+wallLayout.brandPanel.width/2,0,W-.006);backdrop.rotation.y=Math.PI;root.add(backdrop);root.updateMatrixWorld(true);crownWall.attach(backdrop);
  // Category signs follow the actual wall banks: laminate / Quick-Step vinyl
  // share the long north wall; SPC Planker occupies the back wall.
- for(const [text,w,x,y,z,rotation,side] of [['ЛАМИНАТ',2.65,12.2,3.0,.015,0,'north'],['Quick-Step',2.50,6.05,3.0,.015,0,'north'],['SPC',1.40,.015,2.90,3.5,Math.PI/2,'back']]){
-  const sign=createAshanCategorySign(text,w);sign.position.set(x,y,z);sign.rotation.y=rotation;root.add(sign);const wall=walls.find(o=>o.userData.side===side);wall.userData.blankWall=false;root.updateMatrixWorld(true);wall.attach(sign);
+ for(const [text,w,x,y,z,rotation,side] of [['ПВХ-ПЛИТКА',2.85,7.0,3.12,.015,0,'north'],['Quick-Step',2.0,10.165,2.94,.015,0,'north'],['ЛАМИНАТ',2.65,13.6,3.12,.015,0,'north'],['SPC',1.40,.015,2.90,3.5,Math.PI/2,'back']]){
+  const sign=text==='Quick-Step'?createQuickStepWallLogo(w):createWallCategorySign(text,w);sign.userData.ashanCategory=text;sign.position.set(x,y,z);sign.rotation.y=rotation;root.add(sign);const wall=walls.find(o=>o.userData.side===side);wall.userData.blankWall=false;root.updateMatrixWorld(true);wall.attach(sign);
  }
  return {root,walls,roof,lights,portal,furnishing};
 }
