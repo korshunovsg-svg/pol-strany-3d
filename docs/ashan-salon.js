@@ -3,7 +3,9 @@ import {ashanSize,ashanDisplays,ashanWorkstation} from './ashan-layout.js?v=24';
 import {createExtraRack,extraRackNames} from './ashan-extra-racks.js?v=23';
 import {createParquetStand,parquetNames} from './ashan-parquet.js?v=21';
 import {createRemainingRack,remainingNames} from './remaining-racks.js?v=24';
-import {createCrownwoodWallPanel} from './wall-decor.js?v=24';
+import {createAshanCrownwoodPanels,placePanelAboveDisplays,createAshanCategorySign} from './crownwood-panels.js?v=26';
+import {createPolStranyWallPanel,wallLayout} from './wall-decor.js?v=26';
+import {createUnderlayRack} from './underlay-rack.js?v=25';
 
 function mesh(parent,g,m,x=0,y=0,z=0,name=''){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.name=name;o.castShadow=o.receiveShadow=true;parent.add(o);return o;}
 function box(parent,w,h,d,x,y,z,m,name){return mesh(parent,new THREE.BoxGeometry(w,h,d),m,x,y,z,name);}
@@ -77,9 +79,17 @@ export function createAshanSalon({sourceModel,woodTextures=[],parquetTextures={}
  }
  for(const z of [1.10,3.5,5.9])for(const x of [3.0,7.7,12.5]){const light=new THREE.PointLight(0xf2f4ff,22,7.0,1.55);light.position.set(x,H-1.0,z);lights.add(light);}
  for(const x of [2.5,7.0,11.5,15.0]){const d=mesh(roof,new THREE.CylinderGeometry(.26,.26,.012,32),silver,x,H-1.28,3.5,'Suspended circular service plate');pipe(roof,[x,H-.15,3.5],[x,H-1.28,3.5],.005,silver,'Service plate suspension');}
- const panel=createCrownwoodWallPanel({oak:woodTextures[0],width:4.65,height:1.30});panel.position.set(13.985,2.68,W-.015);panel.rotation.y=Math.PI;root.add(panel);
- const crownWall=walls.find(w=>w.userData.side==='south');crownWall.userData.blankWall=false;crownWall.userData.crownwoodWall=true;crownWall.name='Dark showroom wall with Crownwood oak and moss panel';root.updateMatrixWorld(true);crownWall.attach(panel);
  const furnishing=createDisplayFurnishing({sourceModel,layout:[...ashanDisplays,...ashanWorkstation],woodTextures,parquetTextures,extraTextures});root.add(furnishing);
+ const panel=createAshanCrownwoodPanels(woodTextures[0],extraTextures.ashanPanelReference);panel.position.set(13.985,0,W-.015);panel.rotation.y=Math.PI;placePanelAboveDisplays(panel,furnishing,['urban','nord']);root.add(panel);
+ const crownWall=walls.find(w=>w.userData.side==='south');crownWall.userData.blankWall=false;crownWall.userData.crownwoodWall=true;crownWall.name='Dark showroom wall with three Crownwood decorative elements';root.updateMatrixWorld(true);crownWall.attach(panel);
+ // Same timber backdrop and logo as Crocus, centred behind the consultation desk.
+ // Its 3.1 m height is independent of Ashan's 5.1 m industrial ceiling.
+ const desk=ashanWorkstation.find(o=>o.kind==='desk'),backdrop=createPolStranyWallPanel({oak:woodTextures[0]});backdrop.position.set(desk.x+wallLayout.brandPanel.width/2,0,W-.006);backdrop.rotation.y=Math.PI;root.add(backdrop);root.updateMatrixWorld(true);crownWall.attach(backdrop);
+ // Category signs follow the actual wall banks: laminate / Quick-Step vinyl
+ // share the long north wall; SPC Planker occupies the back wall.
+ for(const [text,w,x,y,z,rotation,side] of [['ЛАМИНАТ',2.65,12.2,3.0,.015,0,'north'],['Quick-Step',2.50,6.05,3.0,.015,0,'north'],['SPC',1.40,.015,2.90,3.5,Math.PI/2,'back']]){
+  const sign=createAshanCategorySign(text,w);sign.position.set(x,y,z);sign.rotation.y=rotation;root.add(sign);const wall=walls.find(o=>o.userData.side===side);wall.userData.blankWall=false;root.updateMatrixWorld(true);wall.attach(sign);
+ }
  return {root,walls,roof,lights,portal,furnishing};
 }
 export function createDisplayFurnishing({sourceModel,layout,woodTextures=[],parquetTextures={},extraTextures={},roomId='ashan',createCustom=null}){
@@ -88,7 +98,8 @@ export function createDisplayFurnishing({sourceModel,layout,woodTextures=[],parq
  for(const [i,spec] of layout.entries()){
   let clone=createCustom?.(spec.kind,spec);
   if(!clone){
-  if(remainingNames[spec.kind])clone=createRemainingRack(spec.kind,{woodTextures,herringboneTextures:parquetTextures.herringboneTextures,...extraTextures},spec.photoVariant??spec.variant??0);
+  if(spec.kind==='underlay'&&roomId==='ashan'&&extraTextures.underlayReference)clone=createUnderlayRack(extraTextures.underlayReference);
+  else if(remainingNames[spec.kind])clone=createRemainingRack(spec.kind,{woodTextures,herringboneTextures:parquetTextures.herringboneTextures,...extraTextures},spec.photoVariant??spec.variant??0);
   else if(extraRackNames[spec.kind])clone=createExtraRack(spec.kind,{woodTextures,herringboneTextures:parquetTextures.herringboneTextures,...extraTextures},spec.variant??0);
   else if(parquetNames[spec.kind])clone=createParquetStand(spec.kind,{woodTextures,...parquetTextures,compactFactory:roomId==='omsk'},spec.variant??0);
   else {

@@ -1,9 +1,9 @@
 import * as THREE from './vendor/three.module.js';
 import {omskSize,omskFootprint,omskWalls,omskDisplays,omskWorkstation,omskContains} from './omsk-layout.js?v=24';
-import {createDisplayFurnishing,batchFurniture} from './ashan-salon.js?v=24';
+import {createDisplayFurnishing,batchFurniture} from './ashan-salon.js?v=26';
 import {makeWallLettering} from './wall-lettering.js';
 import font from './assets/omsk/font.js?v=21';
-import {createCrownwoodWallPanel} from './wall-decor.js?v=24';
+import {createOmskCrownwoodPanel,placePanelAboveDisplays} from './crownwood-panels.js?v=26';
 function mesh(p,g,m,x=0,y=0,z=0,name=''){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.name=name;o.castShadow=o.receiveShadow=true;p.add(o);return o;}
 function box(p,w,h,d,x,y,z,m,name){return mesh(p,new THREE.BoxGeometry(w,h,d),m,x,y,z,name);}
 function psLogo(h){const g=new THREE.Group(),left=makeWallLettering('ПОЛ',h,{font,color:0x32bc25,depth:.008,tracking:.006});g.add(left);const iconX=left.userData.width+h*.17,iconW=h*.9,white=new THREE.MeshStandardMaterial({color:0xf8f8ef}),green=new THREE.MeshStandardMaterial({color:0x32bc25}),red=new THREE.MeshStandardMaterial({color:0xbd3442});box(g,iconW,h,.008,iconX+iconW/2,h/2,0,white,'PS logo white square');box(g,iconW*.55,h*.78,.010,iconX+iconW*.32,h*.59,.008,green,'PS logo green block');box(g,iconW*.35,h*.3,.012,iconX+iconW*.70,h*.18,.010,white,'PS logo white corner');const dot=mesh(g,new THREE.CircleGeometry(h*.16,20),red,iconX+iconW*.77,h*.83,.017,'PS logo red dot');const right=makeWallLettering('СТРАНЫ',h,{font,color:0xf8f8ef,depth:.008,tracking:.006});right.position.x=iconX+iconW+h*.15;g.add(right);g.userData={width:right.position.x+right.userData.width,text:'ПОЛ СТРАНЫ'};return g;}
@@ -46,7 +46,6 @@ export function createOmskSalon({sourceModel,woodTextures=[],parquetTextures={},
   box(g,w,2.55,d,x,1.275,z,gray,r.column?'Dark lower column cladding':'Dark lower showroom wall');box(g,w,H-2.55,d,x,(H+2.55)/2,z,ivory,r.column?'White upper column to the ceiling':'White high showroom wall');
   if(r.column)box(g,w+.008,.045,d+.008,x,.027,z,ivory,'Column skirting');
  }
- const panel=createCrownwoodWallPanel({oak:woodTextures[0],width:4.45,height:1.30});panel.position.set(a+.101,2.70,2.52);panel.rotation.y=Math.PI/2;walls.find(w=>w.userData.planId===253).add(panel);
  // Low service-zone backdrop and a simple timber PS panel, as in the photographs.
  box(root,.025,2.6,2.6,a+.10,1.3,6.73,new THREE.MeshStandardMaterial({map:woodTextures[3]??null,color:0xd1c2a4,roughness:.87}),'Timber PS workstation backdrop');
  letters(root,'ПОЛ СТРАНЫ',.16,a+.122,2.10,7.68,Math.PI/2,0x40ad39,1.85);
@@ -69,5 +68,6 @@ export function createOmskSalon({sourceModel,woodTextures=[],parquetTextures={},
  for(const [text,z,w] of words){const g=letters(portal,text,.36,L+.102,signY+.16,z+w/2,Math.PI/2,text==='ПОЛ СТРАНЫ'?0x48c82e:0xf8f8ef,w);g.userData.omskFacadeSign=true;if(text==='ПОЛ СТРАНЫ'){g.userData.entranceSign=true;letters(portal,'ОМСК',.115,L+.105,signY+.025,z+.32,Math.PI/2,0xf7f5e6,.64);}}
  for(const [text,x,w] of [['ПАРКЕТ',12.1,2.5],['ПОЛ СТРАНЫ',16.1,2.9]]){const g=letters(portal,text,.38,x+w,signY+.14,-.112,Math.PI,text==='ПОЛ СТРАНЫ'?0x48c82e:0xf8f8ef,w);g.userData.omskFacadeSign=true;}
  const furnishing=createDisplayFurnishing({sourceModel,layout:[...omskDisplays,...omskWorkstation],woodTextures,parquetTextures,extraTextures,roomId:'omsk',createCustom:lounge});root.add(furnishing);
+ const panel=createOmskCrownwoodPanel(woodTextures[0]);panel.position.set(a+.101,0,2.52);panel.rotation.y=Math.PI/2;placePanelAboveDisplays(panel,furnishing,['urban','nord']);walls.find(w=>w.userData.planId===253).add(panel);
  root.userData.ceilingPanels=panels;return {root,walls,roof,lights,portal,furnishing};
 }

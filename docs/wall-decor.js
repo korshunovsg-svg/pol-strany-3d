@@ -19,14 +19,21 @@ export function createWallDecor({leftWall,oak}){
  for(const spec of wallLayout.inscriptions){const letters=makeWallLettering(spec.text,spec.height);letters.scale.x=spec.width/letters.userData.width;letters.position.set(spec.u,spec.y,.015);root.add(letters);}
  // Sharp solid geometry replaces the low-resolution photo patches for Crownwood.
  const crown=makeCrownwood();crown.position.set(1.95,0,.067);root.add(crown);
- const brand=wallLayout.brandPanel;
- for(let col=0;col<15;col++){
-  const t=oak.clone();t.needsUpdate=true;t.rotation=Math.PI/2;t.repeat.set(1.2,.16);t.offset.set(rand(),rand());const m=new THREE.MeshStandardMaterial({map:t,color:0xd0c0a4,roughness:.72});slab(root,brand.width/15-.001,brand.height,.035,brand.u+(col+.5)*brand.width/15,brand.height/2,.025,m);
- }
- const ps=makePolStranyLogo();ps.position.set(brand.u+1.55-.75,1.59,.065);root.add(ps);
+ const brand=createPolStranyWallPanel({oak,rand});brand.position.x=wallLayout.brandPanel.u;root.add(brand);
  // Two detailed moss frames, with raised cushions and fine branching filaments.
  for(const u of [.53,3.3]){const frame=makeMossFrame(rand);frame.position.set(u,1.94,.066);root.add(frame);}
  root.userData.layout=wallLayout;return root;
+}
+
+// Shared consultation backdrop: the Crocus dimensions stay fixed in taller rooms.
+// Origin is the lower left edge; the decorative face points along +Z.
+export function createPolStranyWallPanel({oak,rand}={}){
+ const root=new THREE.Group(),brand=wallLayout.brandPanel;root.name='Pol Strany vertical oak consultation backdrop';root.userData={polStranyWallPanel:true,width:brand.width,height:brand.height,crocusAnalogue:true};
+ let seed=420;const random=rand??(()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;});
+ for(let col=0;col<15;col++){
+  const t=oak?.clone();if(t){t.needsUpdate=true;t.rotation=Math.PI/2;t.repeat.set(1.2,.16);t.offset.set(random(),random());}const m=new THREE.MeshStandardMaterial({map:t??null,color:0xd0c0a4,roughness:.72});slab(root,brand.width/15-.001,brand.height,.035,(col+.5)*brand.width/15,brand.height/2,.025,m);
+ }
+ const ps=makePolStranyLogo();ps.position.set(1.55-.75,1.59,.065);root.add(ps);return root;
 }
 
 function polygonMesh(points,material,depth=.015){
