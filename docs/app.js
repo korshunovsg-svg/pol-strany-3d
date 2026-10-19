@@ -5,8 +5,8 @@ import {createSampleRacks,rackObstacles,drawSampleRacksMap} from './sample-racks
 import {createDWRacks,dwObstacles,drawDWRacksMap} from './dw-racks.js?v=10';
 import {createPolarwoodRacks,polarwoodObstacles,drawPolarwoodMap} from './polarwood-racks.js?v=9';
 import {createHarmonyRacks,harmonyObstacles,drawHarmonyMap} from './harmony-racks.js?v=10';
-import {createMall,addSalonEntranceSign} from './mall-shell.js?v=28';
-import {mallLayout,mallFloorRects,roomFootprint,getRoomFootprint,roomToWorld,mallLocation,containsMallFloor,createMallNavigation,mallMapMetrics,worldToMallMap,mallMapToWorld,transformRoomRect} from './mall-navigation.js?v=24';
+import {createMall,addSalonEntranceSign} from './mall-shell.js?v=32';
+import {mallLayout,mallFloorRects,roomFootprint,getRoomFootprint,roomToWorld,mallLocation,containsMallFloor,createMallNavigation,mallMapMetrics,worldToMallMap,mallMapToWorld,transformRoomRect} from './mall-navigation.js?v=32';
 import {omskSize,omskColumns,omskWalls,omskFurnitureObstacles,drawOmskMap} from './omsk-layout.js?v=24';
 import {ashanFurnitureObstacles,drawAshanMap} from './ashan-layout.js?v=24';
 import {createPVCRacks,pvcObstacles,drawPVCMap} from './pvc-racks.js?v=15';
@@ -16,11 +16,12 @@ import {createSPCRacks,spcObstacles,drawSPCMap} from './spc-racks.js?v=23';
 import {createCrocusUnderlay,underlayObstacles,drawUnderlayMap} from './underlay-rack.js?v=25';
 import {batchFurniture} from './ashan-salon.js?v=28';
 import {createScenePerformance} from './scene-performance.js?v=25';
+import {factoryObstacles,createCrocusFactoryStands,addCrocusQuickStepSigns,drawFactoryMap} from './crocus-additions.js?v=29';
 const $=id=>document.getElementById(id);
 const BASE={length:15,width:5.5,height:3.1,notch:1.05,notchEnd:4.05};
 const omskSpec=mallLayout.rooms.find(r=>r.id==='omsk');
 const ashanSpec=mallLayout.rooms.find(r=>r.id==='ashan');
-const mallNavigation=createMallNavigation({furnitureObstacles:[...workstationObstacles,...rackObstacles,...dwObstacles,...polarwoodObstacles,...harmonyObstacles,...pvcObstacles,...laminateObstacles,...islandObstacles,...spcObstacles,...underlayObstacles,...omskFurnitureObstacles.map(o=>transformRoomRect(omskSpec,o)),...ashanFurnitureObstacles.map(o=>transformRoomRect(ashanSpec,o))]});
+const mallNavigation=createMallNavigation({furnitureObstacles:[...workstationObstacles,...rackObstacles,...dwObstacles,...polarwoodObstacles,...harmonyObstacles,...pvcObstacles,...laminateObstacles,...islandObstacles,...spcObstacles,...underlayObstacles,...factoryObstacles,...omskFurnitureObstacles.map(o=>transformRoomRect(omskSpec,o)),...ashanFurnitureObstacles.map(o=>transformRoomRect(ashanSpec,o))]});
 let dims={...BASE},mode='walk',yaw=Math.PI/2,pitch=0,orbitAngle=1.0,orbitPhi=.72,orbitRadius=18,planZoom=1,last=0,drag=null,renderDirty=true,lastRender=0,renderedFrames=0,showCeiling=true,showLights=true;
 const keys=new Set(),pos=new THREE.Vector3(14.75,1.65,2.75),target=new THREE.Vector3(7.5,.2,2.75);
 const scene=new THREE.Scene();scene.background=new THREE.Color('#9fa9a6');
@@ -53,6 +54,7 @@ wall(L-1.05+.18,.16,(L+1.05)/2,-.08,'north');wall(L+.18,.16,L/2,W+.08,'south');w
 // The first two structural bays follow the wall composition in the supplied photo.
 const leftWall=walls.find(w=>w.userData.side==='south');
 createWallDecor({leftWall,oak});
+const crocusQuickSigns=addCrocusQuickStepSigns(model,walls.find(w=>w.userData.side==='north'));batchFurniture(crocusQuickSigns,'crocusQuickSigns');
 model.add(createWorkstation({surfaceTexture:plaster,oak}));
 const rackLabels={};
 for(const collection of ['urban','elegance']){
@@ -130,6 +132,10 @@ const extraTextures={photoTextures:{},brandTextures:{},labelTexture:loader.load(
 extraTextures.underlayReference=loader.load('assets/update25/underlay-reference.png');extraTextures.underlayReference.colorSpace=THREE.SRGBColorSpace;extraTextures.underlayReference.anisotropy=4;
 extraTextures.ashanPanelReference=loader.load('assets/update25/ashan-panels-reference.png');extraTextures.ashanPanelReference.colorSpace=THREE.SRGBColorSpace;extraTextures.ashanPanelReference.anisotropy=4;
 extraTextures.corkartPanelReference=loader.load('assets/update28/corkart-reference.jpg');extraTextures.corkartPanelReference.colorSpace=THREE.SRGBColorSpace;extraTextures.corkartPanelReference.anisotropy=4;
+extraTextures.classenWallReference=loader.load('assets/update29/classen-reference.jpg');extraTextures.anticHeaderReference=loader.load('assets/update29/antic-reference.jpg');
+for(const t of [extraTextures.classenWallReference,extraTextures.anticHeaderReference]){t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;}
+extraTextures.reverseHeaderPosters={laminatePoster:loader.load('assets/update30/laminate-interior.webp'),vinylPoster:loader.load('assets/update30/vinyl-interior.webp'),woodTextures:sampleWoods};
+for(const t of [extraTextures.reverseHeaderPosters.laminatePoster,extraTextures.reverseHeaderPosters.vinylPoster]){t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;}
 model.add(createCrocusUnderlay(extraTextures.underlayReference));
 extraTextures.remainingPhotos={};extraTextures.remainingLabels={};
 for(const kind of ['alpinePVC','evofloor','skalla','norland','karelia','carpet'])extraTextures.remainingPhotos[kind]=loader.load(`assets/remaining/${kind}-reference.jpg`);
@@ -138,6 +144,7 @@ for(const t of [...Object.values(extraTextures.remainingPhotos),...Object.values
 for(const kind of ['docke','planker','quickAccessories'])extraTextures.photoTextures[kind]=loader.load(`assets/ashan-extra/${kind}-reference${kind==='docke'?'-v23':''}.jpg`);
 for(const kind of ['docke','planker','quickAccessories'])extraTextures.brandTextures[kind]=loader.load(`assets/ashan-extra/${kind}-brand.svg`);
 for(const t of [...Object.values(extraTextures.photoTextures),...Object.values(extraTextures.brandTextures),extraTextures.labelTexture]){t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;}
+model.add(createCrocusFactoryStands(sampleWoods,parquetTextures));
 const mall=createMall({shellMeshes,roofTemplate:roof,fixtureTemplate:fixtures,portalTemplate:portal,materials:mat,tileTexture,sourceModel:model,woodTextures:sampleWoods,parquetTextures,extraTextures});model.add(mall.root);
 // Crocus previously submitted thousands of tiny sample parts individually.
 // Merge static surfaces after the other salons have cloned their prototypes.
@@ -224,7 +231,7 @@ function buildMapBase(){const ctx=mapBase.getContext('2d');
   else if(room.id==='ashan'){ctx.moveTo(16.5,2);for(const [x,z] of [[16.5,0],[0,0],[0,7],[16.5,7],[16.5,5]])ctx.lineTo(x,z);ctx.stroke();ctx.setLineDash([.12,.12]);ctx.beginPath();ctx.moveTo(16.5,2);ctx.lineTo(16.5,5);}
   else{ctx.moveTo(15,0);for(const [x,z] of [roomFootprint[0],roomFootprint[5],roomFootprint[4],roomFootprint[3],roomFootprint[2]])ctx.lineTo(x,z);ctx.stroke();ctx.fillStyle='#a8afa0';ctx.fillRect(0,5.05,.45,.45);ctx.setLineDash([.12,.12]);ctx.beginPath();ctx.moveTo(15,.1);ctx.lineTo(15,5.4);}
   ctx.strokeStyle='#c1ed94';ctx.stroke();ctx.setLineDash([]);
-  if(room.id==='crocus'){drawWorkstationMap(ctx);drawSampleRacksMap(ctx);drawDWRacksMap(ctx);drawPolarwoodMap(ctx);drawHarmonyMap(ctx);drawPVCMap(ctx);drawLaminateMap(ctx);drawIslandMap(ctx);drawSPCMap(ctx);drawUnderlayMap(ctx);}
+  if(room.id==='crocus'){drawWorkstationMap(ctx);drawSampleRacksMap(ctx);drawDWRacksMap(ctx);drawPolarwoodMap(ctx);drawHarmonyMap(ctx);drawPVCMap(ctx);drawLaminateMap(ctx);drawIslandMap(ctx);drawSPCMap(ctx);drawUnderlayMap(ctx);drawFactoryMap(ctx);}
   if(room.id==='ashan')drawAshanMap(ctx);
   if(room.id==='omsk')drawOmskMap(ctx);
   ctx.restore();

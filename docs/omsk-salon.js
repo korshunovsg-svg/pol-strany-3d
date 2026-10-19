@@ -2,6 +2,7 @@ import * as THREE from './vendor/three.module.js';
 import {omskSize,omskFootprint,omskWalls,omskDisplays,omskWorkstation,omskContains} from './omsk-layout.js?v=24';
 import {createDisplayFurnishing,batchFurniture} from './ashan-salon.js?v=28';
 import {createParquetHeadings,createCorkartBrandPanel,createQuickStepWallLogo,createWallCategorySign} from './showroom-branding.js?v=28';
+import {createOmskClassenPanels,createOmskConsultationBackdrop,createOmskHeaderReverses} from './omsk-finishes.js?v=30';
 import {makeWallLettering} from './wall-lettering.js';
 import font from './assets/omsk/font.js?v=21';
 import {createOmskCrownwoodPanel,placePanelAboveDisplays} from './crownwood-panels.js?v=26';
@@ -47,9 +48,7 @@ export function createOmskSalon({sourceModel,woodTextures=[],parquetTextures={},
   box(g,w,2.55,d,x,1.275,z,gray,r.column?'Dark lower column cladding':'Dark lower showroom wall');box(g,w,H-2.55,d,x,(H+2.55)/2,z,gray,r.column?'Gray upper column to the ceiling':'Gray high showroom wall');
   if(r.column)box(g,w+.008,.045,d+.008,x,.027,z,gray,'Column skirting');
  }
- // Low service-zone backdrop and a simple timber PS panel, as in the photographs.
- box(root,.025,2.6,2.6,a+.10,1.3,6.73,new THREE.MeshStandardMaterial({map:woodTextures[3]??null,color:0xd1c2a4,roughness:.87}),'Timber PS workstation backdrop');
- letters(root,'ПОЛ СТРАНЫ',.16,a+.122,2.10,7.68,Math.PI/2,0x40ad39,1.85);
+ const desk=omskWorkstation.find(o=>o.kind==='desk'),psBackdrop=createOmskConsultationBackdrop(woodTextures[0],desk,8.17001);walls.find(w=>w.userData.planId===253).add(psBackdrop);batchFurniture(psBackdrop,'omskPsBackdrop');
  // Continuous rectangular lattice strips preserve real open cells instead of a flat texture.
  for(let x=.04;x<L;x+=.16){const start=x<a?b:0;box(roof,.008,.065,W-start,x,H-.02,(W+start)/2,grid,'Open-cell ceiling longitudinal strip');}
  for(let z=.04;z<W;z+=.16){const start=z<b?a:0;box(roof,L-start,.065,.008,(L+start)/2,H-.02,z,grid,'Open-cell ceiling cross strip');}
@@ -69,6 +68,8 @@ export function createOmskSalon({sourceModel,woodTextures=[],parquetTextures={},
  for(const [text,z,w] of words){const g=letters(portal,text,.36,L+.102,signY+.16,z+w/2,Math.PI/2,text==='ПОЛ СТРАНЫ'?0x48c82e:0xf8f8ef,w);g.userData.omskFacadeSign=true;if(text==='ПОЛ СТРАНЫ'){g.userData.entranceSign=true;letters(portal,'ОМСК',.115,L+.105,signY+.025,z+.32,Math.PI/2,0xf7f5e6,.64);}}
  for(const [text,x,w] of [['ПАРКЕТ',12.1,2.5],['ПОЛ СТРАНЫ',16.1,2.9]]){const g=letters(portal,text,.38,x+w,signY+.14,-.112,Math.PI,text==='ПОЛ СТРАНЫ'?0x48c82e:0xf8f8ef,w);g.userData.omskFacadeSign=true;}
  const furnishing=createDisplayFurnishing({sourceModel,layout:[...omskDisplays,...omskWorkstation],woodTextures,parquetTextures,extraTextures,roomId:'omsk',createCustom:lounge});root.add(furnishing);
+ const classen=createOmskClassenPanels(extraTextures.classenWallReference);classen.position.set(7.35101,2.42,7.27501);walls.find(w=>w.userData.planId===258).add(classen);batchFurniture(classen,'omskClassenWall');
+ const headerReverses=createOmskHeaderReverses(furnishing,[...omskDisplays,...omskWorkstation],extraTextures.anticHeaderReference,extraTextures.reverseHeaderPosters);root.add(headerReverses);batchFurniture(headerReverses,'omskHeaderReverses');
  const panel=createOmskCrownwoodPanel(woodTextures[0]);panel.position.set(a+.101,0,2.52);panel.rotation.y=Math.PI/2;placePanelAboveDisplays(panel,furnishing,['urban','nord']);walls.find(w=>w.userData.planId===253).add(panel);
  const headings=createParquetHeadings(2.7);headings.position.set(panel.position.x,new THREE.Box3().setFromObject(panel).max.y+.18,panel.position.z);headings.rotation.y=Math.PI/2;walls.find(w=>w.userData.planId===253).add(headings);
  // Corkart's bank faces inward from the short PDF wall at the open frontage.

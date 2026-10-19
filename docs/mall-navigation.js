@@ -31,8 +31,10 @@ export const hallWallRects=[
  {minX:26.92,maxX:27.08,minZ:0,maxZ:8.58},
  {minX:14.92,maxX:17.5,minZ:8.42,maxZ:8.58},
  {minX:24.5,maxX:27.08,minZ:8.42,maxZ:8.58},
- {minX:11.92,maxX:12.08,minZ:-3.08,maxZ:.08},
- {minX:12,maxX:15,minZ:-.08,maxZ:.08},
+ // Stop the corridor return outside Crocus; its end must not protrude through
+ // the gray showroom wall or cover the ПВХ-ПЛИТКА lettering.
+ {minX:11.92,maxX:12.08,minZ:-3.08,maxZ:-.16},
+ {minX:12,maxX:15,minZ:-.16,maxZ:0,crocusSharedBoundary:true},
  {minX:32.42,maxX:32.58,minZ:-12.48,maxZ:.08},
  {minX:27,maxX:32.58,minZ:-.08,maxZ:.08},
  {minX:30.42,maxX:32.58,minZ:-12.48,maxZ:-12.32}

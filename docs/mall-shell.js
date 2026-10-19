@@ -1,9 +1,9 @@
 import * as THREE from './vendor/three.module.js';
 import {makeWallLettering} from './wall-lettering.js';
 import font from './assets/mall-font.js';
-import {mallLayout,hallWallRects,mallFloorRects} from './mall-navigation.js?v=24';
+import {mallLayout,hallWallRects,mallFloorRects} from './mall-navigation.js?v=32';
 import {createAshanSalon} from './ashan-salon.js?v=28';
-import {createOmskSalon} from './omsk-salon.js?v=28';
+import {createOmskSalon} from './omsk-salon.js?v=30';
 import {ashanSize} from './ashan-layout.js?v=24';
 
 function box(parent,w,h,d,x,y,z,m,name=''){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.name=name;o.castShadow=o.receiveShadow=true;parent.add(o);return o;}
@@ -32,7 +32,11 @@ export function createMall({shellMeshes,roofTemplate,fixtureTemplate,portalTempl
   if(r!==h){box(hallRoof,w+.02,.12,d+.02,x,5.46,z,materials.roof,'Omsk approach corridor ceiling');for(let zz=r.minZ+.6;zz<r.maxZ;zz+=2.0)box(hallLights,Math.min(w-.3,1.5),.035,.075,x,5.31,zz,glow,'Omsk approach linear light');}
  }
  for(const spec of hallWallRects){
-  const w=box(root,spec.maxX-spec.minX,5.4,spec.maxZ-spec.minZ,(spec.minX+spec.maxX)/2,2.7,(spec.minZ+spec.maxZ)/2,pale,'Gallery wall');
+  // This wall is shared with Crocus: keep it outside the interior and use the
+  // showroom finish on its +Z face, while the corridor face remains beige.
+  const finish=spec.crocusSharedBoundary?[pale,pale,pale,pale,materials.wall,pale]:pale;
+  const w=box(root,spec.maxX-spec.minX,5.4,spec.maxZ-spec.minZ,(spec.minX+spec.maxX)/2,2.7,(spec.minZ+spec.maxZ)/2,finish,'Gallery wall');
+  if(spec.crocusSharedBoundary)w.userData.crocusSharedBoundary=true;
   w.userData.mallWall=true;wallMeshes.push(w);
   const cx=w.position.x,cz=w.position.z;
   w.userData.normal=cx>26?[1,0]:cx<16?[-1,0]:cz<0?[0,-1]:[0,1];
